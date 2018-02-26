@@ -3,14 +3,13 @@ package com.example.user.myapplication;
 import android.content.ContentProviderOperation;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -23,9 +22,9 @@ import jxl.Sheet;
 import jxl.Workbook;
 import jxl.read.biff.BiffException;
 
-public class MainActivity extends AppCompatActivity {
+public class ImportContactsActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "ImportContactsActivity";
     private FileListCursorAdapter mAdapter;
     private List<ContactInfo> mContactInfoList = new ArrayList<ContactInfo>();
 
@@ -40,7 +39,8 @@ public class MainActivity extends AppCompatActivity {
         listView.setAdapter(mAdapter);
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long
+                    id) {
                 showPopWindows(view);
 //                FileInfo fileInfo = mAdapter.getFileItem(position);
 //                String filePath = fileInfo.filePath;
@@ -106,7 +106,8 @@ public class MainActivity extends AppCompatActivity {
                         .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
                         .withValue(ContactsContract.Data.MIMETYPE,
                                 ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
-                        .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, contactInfo.getPhoneNumber())
+                        .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, contactInfo
+                                .getPhoneNumber())
                         .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,
                                 ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE)
                         .build());
@@ -124,10 +125,12 @@ public class MainActivity extends AppCompatActivity {
     private Cursor getXlsFiles() {
         String volumeName = "external";
         Uri uri = MediaStore.Files.getContentUri(volumeName);
-        String selection = "(mime_type=='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') OR (mime_type=='application/vnd.ms-excel')";
+        String selection = "(mime_type=='application/vnd.openxmlformats-officedocument" +
+                ".spreadsheetml.sheet') OR (mime_type=='application/vnd.ms-excel')";
         String sortOrder = MediaStore.Files.FileColumns.TITLE + " asc";
         String[] columns = new String[]{
-                MediaStore.Files.FileColumns._ID, MediaStore.Files.FileColumns.DATA, MediaStore.Files.FileColumns.SIZE, MediaStore.Files.FileColumns.DATE_MODIFIED
+                MediaStore.Files.FileColumns._ID, MediaStore.Files.FileColumns.DATA, MediaStore
+                .Files.FileColumns.SIZE, MediaStore.Files.FileColumns.DATE_MODIFIED
         };
         Cursor cursor = getContentResolver().query(uri, columns, selection, null, sortOrder);
         return cursor;
@@ -138,9 +141,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void showPopWindows(View view) {
         List<String> dataList = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            dataList.add(String.valueOf(i));
-        }
+        dataList.add(getResources().getString(R.string.item_import));
+        dataList.add(getResources().getString(R.string.item_share));
         if (mPopupWindowList == null) {
             mPopupWindowList = new PopupWindowList(view.getContext());
         }

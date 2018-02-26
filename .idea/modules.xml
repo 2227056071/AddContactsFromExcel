@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/AddContactsFromExcel.iml" filepath="$PROJECT_DIR$/AddContactsFromExcel.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/contacts.iml" filepath="$PROJECT_DIR$/contacts.iml" />
+      <module fileurl="file://E:\projects\contacts\AddContactsFromExcel\app\app.iml" filepath="E:\projects\contacts\AddContactsFromExcel\app\app.iml" />
+      <module fileurl="file://E:\projects\contacts\AddContactsFromExcel\contacts.iml" filepath="E:\projects\contacts\AddContactsFromExcel\contacts.iml" />
     </modules>
   </component>
 </project>

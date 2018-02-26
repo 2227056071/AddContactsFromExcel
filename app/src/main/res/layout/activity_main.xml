@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.user.myapplication.MainActivity">
+    tools:context="com.example.user.myapplication.ImportContactsActivity">
 
     <ListView
         android:id="@+id/file_path_list"
