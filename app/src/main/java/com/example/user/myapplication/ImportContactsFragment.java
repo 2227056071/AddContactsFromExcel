@@ -6,9 +6,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
-import android.support.v7.app.AppCompatActivity;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -22,20 +25,25 @@ import jxl.Sheet;
 import jxl.Workbook;
 import jxl.read.biff.BiffException;
 
-public class ImportContactsActivity extends AppCompatActivity {
-
-    private static final String TAG = "ImportContactsActivity";
+/**
+ * Created by Carson_Ho on 16/7/22.
+ */
+public class ImportContactsFragment extends Fragment {
+    private View mView;
     private FileListCursorAdapter mAdapter;
     private List<ContactInfo> mContactInfoList = new ArrayList<ContactInfo>();
+    private static final String TAG = "ImportContactsFragment";
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_import_contacts);
+    public View onCreateView(LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        mView = inflater.inflate(R.layout.activity_import_contacts, container, false);
 
-        Cursor cursor = getXlsFiles();
-        ListView listView = findViewById(R.id.file_path_list);
-        mAdapter = new FileListCursorAdapter(this, cursor, 0);
+        Cursor cursor = getExcelFilesCursor();
+        ListView listView = mView.findViewById(R.id.file_path_list);
+        mAdapter = new FileListCursorAdapter(getContext(), cursor, 0);
         listView.setAdapter(mAdapter);
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -45,6 +53,7 @@ public class ImportContactsActivity extends AppCompatActivity {
                 return true;
             }
         });
+        return mView;
     }
 
     private void getXlsFileDataByJxl(File file) {
@@ -109,15 +118,16 @@ public class ImportContactsActivity extends AppCompatActivity {
             }
             // Asking the Contact provider to create a new contact
             try {
-                getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+                getContext().getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
             } catch (Exception e) {
                 e.printStackTrace();
-                Toast.makeText(this, "Exception: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Exception: " + e.getMessage(), Toast.LENGTH_SHORT)
+                        .show();
             }
         }
     }
 
-    private Cursor getXlsFiles() {
+    private Cursor getExcelFilesCursor() {
         String volumeName = "external";
         Uri uri = MediaStore.Files.getContentUri(volumeName);
         String selection = "(mime_type=='application/vnd.openxmlformats-officedocument" +
@@ -127,7 +137,8 @@ public class ImportContactsActivity extends AppCompatActivity {
                 MediaStore.Files.FileColumns._ID, MediaStore.Files.FileColumns.DATA, MediaStore
                 .Files.FileColumns.SIZE, MediaStore.Files.FileColumns.DATE_MODIFIED
         };
-        Cursor cursor = getContentResolver().query(uri, columns, selection, null, sortOrder);
+        Cursor cursor = getContext().getContentResolver().query(uri, columns, selection, null,
+                sortOrder);
         return cursor;
     }
 

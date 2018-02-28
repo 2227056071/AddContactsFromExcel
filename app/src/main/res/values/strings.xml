@@ -2,4 +2,8 @@
     <string name="app_name">helper</string>
     <string name="item_import">import contacts</string>
     <string name="item_share">share</string>
+    <string name="text_import_tab">import</string>
+    <string name="text_export_tab">export</string>
+    <string name="text_setting_tab">setting</string>
+    <string name="toolbarTitle">helper</string>
 </resources>

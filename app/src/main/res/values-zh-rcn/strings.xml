@@ -2,4 +2,8 @@
     <string name="app_name">小助手</string>
     <string name="item_import">导入联系人</string>
     <string name="item_share">分享</string>
+    <string name="text_import_tab">导入</string>
+    <string name="text_export_tab">导出</string>
+    <string name="text_setting_tab">设置</string>
+    <string name="toolbarTitle">小助手</string>
 </resources>
