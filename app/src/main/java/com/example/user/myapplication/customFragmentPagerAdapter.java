@@ -25,7 +25,8 @@ public class customFragmentPagerAdapter extends FragmentPagerAdapter {
         } else if (position == 2) {
             return new SettingFragment();
         }
-        return new ImportContactsFragment();
+//        return new ImportContactsFragment();
+        return new NewImportContactsFragment();
     }
 
     @Override

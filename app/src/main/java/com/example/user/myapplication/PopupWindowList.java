@@ -112,7 +112,7 @@ public class PopupWindowList {
         popView.setVerticalScrollBarEnabled(false);
         popView.setDivider(null);
         popView.setAdapter(new ArrayAdapter<>(mContext,
-                android.R.layout.simple_list_item_1, mItemData));
+                R.layout.mylayout, mItemData));
         popView.setOnItemClickListener(mItemClickListener);
         popView.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
                 View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
@@ -132,6 +132,13 @@ public class PopupWindowList {
         mPopupWindow.setOutsideTouchable(true);
         mPopupWindow.setFocusable(mModal);
         mPopupWindow.setBackgroundDrawable(new BitmapDrawable(mContext.getResources(), (Bitmap) null));
+
+        mPopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                mListener.onWindowDismiss();
+            }
+        });
 
 
         Rect location = locateView(mAnchorView);
@@ -157,6 +164,11 @@ public class PopupWindowList {
             }
             mPopupWindow.showAtLocation(mAnchorView, Gravity.NO_GRAVITY, x, y);
         }
+    }
+    OnWindowDismissListener mListener ;
+    public void setOnWindowDismissListener(OnWindowDismissListener listener)
+    {
+        mListener = listener;
     }
 
     public Rect locateView(View v) {

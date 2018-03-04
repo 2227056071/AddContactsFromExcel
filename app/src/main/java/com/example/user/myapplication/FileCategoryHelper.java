@@ -268,12 +268,17 @@ public class FileCategoryHelper {
                 "COUNT(*)", "SUM(_size)"
         };
         Cursor c = mContext.getContentResolver().query(uri, columns, buildSelectionByCategory(fc), null, null);
+//        Cursor c = mContext.getContentResolver().query(uri, columns, null, null, null);
         if (c == null) {
             Log.e(LOG_TAG, "fail to query uri:" + uri);
             return false;
         }
 
         if (c.moveToNext()) {
+            String fileName = c.getString(c.getColumnIndex(FileColumns.DISPLAY_NAME));
+            String type = c.getString(c.getColumnIndex(FileColumns.MIME_TYPE));
+//            String type = c.getString(c.getColumnIndex(FileColumns.));
+            Log.e(TAG1, fileName + " -- " + type + "--" );
             setCategoryInfo(fc, c.getLong(0), c.getLong(1));
             Log.v(LOG_TAG, "Retrieved " + fc.name() + " info >>> count:" + c.getLong(0) + " size:" + c.getLong(1));
             c.close();

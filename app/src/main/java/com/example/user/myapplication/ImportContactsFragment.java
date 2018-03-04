@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -132,16 +133,37 @@ public class ImportContactsFragment extends Fragment {
         Uri uri = MediaStore.Files.getContentUri(volumeName);
         String selection = "(mime_type=='application/vnd.openxmlformats-officedocument" +
                 ".spreadsheetml.sheet') OR (mime_type=='application/vnd.ms-excel')";
-        String sortOrder = MediaStore.Files.FileColumns.TITLE + " asc";
+        String sortOrder = MediaStore.Files.FileColumns.TITLE + " desc";
         String[] columns = new String[]{
                 MediaStore.Files.FileColumns._ID, MediaStore.Files.FileColumns.DATA, MediaStore
                 .Files.FileColumns.SIZE, MediaStore.Files.FileColumns.DATE_MODIFIED
         };
         Cursor cursor = getContext().getContentResolver().query(uri, columns, selection, null,
                 sortOrder);
+//        Cursor cursor = getContext().getContentResolver().query(uri, columns, null, null,
+//                sortOrder);
+        while (cursor.moveToNext()){
+            String filePath = cursor.getString(FileCategoryHelper.COLUMN_PATH);
+            String fileName = Util.getNameFromFilepath(filePath);
+//            String type = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.MIME_TYPE));
+            String type = getMimeType(filePath);
+            if (fileName.endsWith(".xls")||fileName.endsWith(".xlsx"))
+            {
+                Log.e(TAG,"filePath == "+filePath+" -- type = "+type );
+            }
+        }
         return cursor;
     }
 
+
+    public static String getMimeType(String url) {
+        String type = null;
+        String extension = MimeTypeMap.getFileExtensionFromUrl(url);
+        if (extension != null) {
+            type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+        }
+        return type;
+    }
 
     private PopupWindowList mPopupWindowList;
 

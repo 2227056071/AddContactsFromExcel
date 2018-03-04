@@ -1,16 +1,22 @@
 package com.example.user.myapplication;
 
+import android.annotation.SuppressLint;
 import android.content.ContentProviderOperation;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -22,29 +28,71 @@ import jxl.Sheet;
 import jxl.Workbook;
 import jxl.read.biff.BiffException;
 
-public class ImportContactsActivity extends AppCompatActivity {
-
-    private static final String TAG = "ImportContactsActivity";
+public class NewImportContactsFragment extends Fragment {
+    private View mFragmentContainer;
     private FileListCursorAdapter mAdapter;
     private List<ContactInfo> mContactInfoList = new ArrayList<ContactInfo>();
+     static final String TAG1 = "ContactsFragment";
+    private LinearLayoutManager mLayoutManager;
+    List<FileInfo> mFileInfoList = new ArrayList<FileInfo>();
+    private View mSelectedItemView;
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_import_contacts);
-
-        Cursor cursor = getXlsFiles();
-        ListView listView = (ListView) findViewById(R.id.file_path_list);
-        mAdapter = new FileListCursorAdapter(this, cursor, 0);
-        listView.setAdapter(mAdapter);
-        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+    public View onCreateView(LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        mFileInfoList.clear(); // 刷新頁面时清空数据
+        mFragmentContainer = inflater.inflate(R.layout.activity_new_import_contacts, container, false);
+        mFragmentContainer.setBackgroundColor(Color.WHITE);
+        mFileInfoList = getFileInfoList();
+        final RecyclerView recyclerView = mFragmentContainer.findViewById(R.id.recyclerview_import_fragment);
+        mLayoutManager = new LinearLayoutManager(getContext());
+        recyclerView.setLayoutManager(mLayoutManager);
+        CustomFileAdapter adapter = new CustomFileAdapter(mFileInfoList, new OnRecycleViewItemListener() {
+            @SuppressLint("LongLogTag")
             @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long
-                    id) {
+            public void OnRecycleViewItemLongClick(View view, FileInfo fileInfo) {
+                mSelectedItemView = view;
+                view.setBackgroundColor(android.graphics.Color.rgb(178, 178, 178));
                 showPopWindows(view);
-                return true;
             }
         });
+        recyclerView.setAdapter(adapter);
+        return mFragmentContainer;
+    }
+
+    @SuppressLint("LongLogTag")
+    private List<FileInfo> getFileInfoList() {
+        String volumeName = "external";
+        Uri uri = MediaStore.Files.getContentUri(volumeName);
+        String sortOrder = MediaStore.Files.FileColumns.TITLE + " desc";
+        String[] columns = new String[]{
+                MediaStore.Files.FileColumns._ID, MediaStore.Files.FileColumns.DATA, MediaStore
+                .Files.FileColumns.SIZE, MediaStore.Files.FileColumns.DATE_MODIFIED
+        };
+//        String selection = "(mime_type=='application/vnd.openxmlformats-officedocument" +
+//                ".spreadsheetml.sheet') OR (mime_type=='application/vnd.ms-excel')";
+//        Cursor cursor = getContext().getContentResolver().query(uri, columns, selection, null,
+//                sortOrder);
+        // selection 设置为 null
+        Cursor cursor = getContext().getContentResolver().query(uri, columns, null, null,
+                sortOrder);
+        while (cursor.moveToNext()) {
+            FileInfo fileInfo = new FileInfo();
+            String filePath = cursor.getString(FileCategoryHelper.COLUMN_PATH);
+            String fileName = Util.getNameFromFilepath(filePath);
+            Long fileSize = cursor.getLong(FileCategoryHelper.COLUMN_SIZE);
+            Long modifyTime = cursor.getLong(FileCategoryHelper.COLUMN_DATE);
+            // 因部分 excel 文件的 mime_type 为 null,此处使用后缀判断
+            if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx")) {
+                fileInfo.fileName = fileName;
+                fileInfo.ModifiedDate = modifyTime;
+                fileInfo.fileSize = fileSize;
+                mFileInfoList.add(fileInfo);
+            }
+        }
+        return mFileInfoList;
     }
 
     private void getXlsFileDataByJxl(File file) {
@@ -109,29 +157,24 @@ public class ImportContactsActivity extends AppCompatActivity {
             }
             // Asking the Contact provider to create a new contact
             try {
-                getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+                getContext().getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
             } catch (Exception e) {
                 e.printStackTrace();
-                Toast.makeText(this, "Exception: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Exception: " + e.getMessage(), Toast.LENGTH_SHORT)
+                        .show();
             }
         }
     }
 
-    private Cursor getXlsFiles() {
-        String volumeName = "external";
-        Uri uri = MediaStore.Files.getContentUri(volumeName);
-        String selection = "(mime_type=='application/vnd.openxmlformats-officedocument" +
-                ".spreadsheetml.sheet') OR (mime_type=='application/vnd.ms-excel')";
-        String sortOrder = MediaStore.Files.FileColumns.TITLE + " asc";
-        String[] columns = new String[]{
-                MediaStore.Files.FileColumns._ID, MediaStore.Files.FileColumns.DATA, MediaStore
-                .Files.FileColumns.SIZE, MediaStore.Files.FileColumns.DATE_MODIFIED
-        };
-        Cursor cursor = getContentResolver().query(uri, columns, selection, null, sortOrder);
-//        Cursor cursor = getContentResolver().query(uri, columns, null, null, sortOrder);
-        return cursor;
-    }
 
+    public static String getMimeType(String url) {
+        String type = null;
+        String extension = MimeTypeMap.getFileExtensionFromUrl(url);
+        if (extension != null) {
+            type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+        }
+        return type;
+    }
 
     private PopupWindowList mPopupWindowList;
 
@@ -147,10 +190,17 @@ public class ImportContactsActivity extends AppCompatActivity {
         mPopupWindowList.setModal(true);
         mPopupWindowList.show();
         mPopupWindowList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @SuppressLint("LongLogTag")
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.e(TAG, "click position=" + position);
                 mPopupWindowList.hide();
+                mSelectedItemView.setBackgroundColor(Color.WHITE);
+            }
+        });
+        mPopupWindowList.setOnWindowDismissListener(new OnWindowDismissListener() {
+            @Override
+            public void onWindowDismiss() {
+                mSelectedItemView.setBackgroundColor(Color.WHITE);
             }
         });
     }

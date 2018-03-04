@@ -49,14 +49,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
+                android:textAppearance="?android:attr/textAppearanceMedium"/>
+
             <TextView
                 android:id="@+id/file_count"
                 android:layout_width="wrap_content"
-                android:layout_marginLeft="5dip"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
                 android:singleLine="true"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+                android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         </LinearLayout>
 

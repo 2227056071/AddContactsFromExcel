@@ -15,7 +15,7 @@ public class FileListCursorAdapter extends CursorAdapter {
 
     private final LayoutInflater mFactory;
 
-//    private FileViewInteractionHub mFileViewInteractionHub;
+    //    private FileViewInteractionHub mFileViewInteractionHub;
 //
 //    private FileIconHelper mFileIcon;
 //
@@ -120,7 +120,16 @@ public class FileListCursorAdapter extends CursorAdapter {
     }
 
     private FileInfo getFileInfo(Cursor cursor) {
+
+//        if (cursor.getString(FileCategoryHelper.COLUMN_PATH).endsWith(".xls") || cursor.getString(FileCategoryHelper.COLUMN_PATH).endsWith(".xlsx")) {
+//            return (cursor == null || cursor.getCount() == 0) ? null : Util
+//                    .GetFileInfo(cursor.getString(FileCategoryHelper.COLUMN_PATH));
+//        } else {
+//            return null;
+//        }
         return (cursor == null || cursor.getCount() == 0) ? null : Util
                 .GetFileInfo(cursor.getString(FileCategoryHelper.COLUMN_PATH));
+
+
     }
 }
