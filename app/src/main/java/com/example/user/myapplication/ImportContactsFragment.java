@@ -131,7 +131,7 @@ public class ImportContactsFragment extends Fragment {
         String volumeName = "external";
         Uri uri = MediaStore.Files.getContentUri(volumeName);
         String selection = "(mime_type=='application/vnd.openxmlformats-officedocument" +
-                ".spreadsheetml.sheet') OR (mime_type=='application/vnd.ms-excel')";
+                ".spreadsheetml.sheet') OR (mime_type=='application/vnd.android.package-archive') OR (mime_type=='application/vnd.ms-excel')";
         String sortOrder = MediaStore.Files.FileColumns.TITLE + " asc";
         String[] columns = new String[]{
                 MediaStore.Files.FileColumns._ID, MediaStore.Files.FileColumns.DATA, MediaStore
