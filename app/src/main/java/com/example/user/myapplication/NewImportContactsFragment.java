@@ -23,19 +23,23 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import jxl.Sheet;
 import jxl.Workbook;
 import jxl.read.biff.BiffException;
 
 public class NewImportContactsFragment extends Fragment {
+    private static final int COUNT_THREAD = 5;
     private View mFragmentContainer;
-    private FileListCursorAdapter mAdapter;
     private List<ContactInfo> mContactInfoList = new ArrayList<ContactInfo>();
-     static final String TAG1 = "ContactsFragment";
+    static final String TAG1 = "ContactsFragment";
     private LinearLayoutManager mLayoutManager;
     List<FileInfo> mFileInfoList = new ArrayList<FileInfo>();
     private View mSelectedItemView;
+    private CustomFileAdapter mAdapter;
+    private String mSelectedItemFilePath;
 
     @Nullable
     @Override
@@ -44,22 +48,38 @@ public class NewImportContactsFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         mFileInfoList.clear(); // 刷新頁面时清空数据
         mFragmentContainer = inflater.inflate(R.layout.activity_new_import_contacts, container, false);
+        initUi();
+        queryExcelFiles();
+        return mFragmentContainer;
+    }
+
+    private void initUi() {
         mFragmentContainer.setBackgroundColor(Color.WHITE);
-        mFileInfoList = getFileInfoList();
         final RecyclerView recyclerView = mFragmentContainer.findViewById(R.id.recyclerview_import_fragment);
         mLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(mLayoutManager);
-        CustomFileAdapter adapter = new CustomFileAdapter(mFileInfoList, new OnRecycleViewItemListener() {
+        mAdapter = new CustomFileAdapter(mFileInfoList, new OnRecycleViewItemListener() {
             @SuppressLint("LongLogTag")
             @Override
             public void OnRecycleViewItemLongClick(View view, FileInfo fileInfo) {
                 mSelectedItemView = view;
                 view.setBackgroundColor(android.graphics.Color.rgb(178, 178, 178));
                 showPopWindows(view);
+                mSelectedItemFilePath = fileInfo.filePath;
             }
         });
-        recyclerView.setAdapter(adapter);
-        return mFragmentContainer;
+        recyclerView.setAdapter(mAdapter);
+    }
+
+    private void queryExcelFiles() {
+        Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                mFileInfoList = getFileInfoList(); // 遍历本地所有文件，属于耗时操作
+            }
+        };
+        ExecutorService executorService = Executors.newFixedThreadPool(COUNT_THREAD);
+        executorService.execute(task);
     }
 
     @SuppressLint("LongLogTag")
@@ -71,9 +91,6 @@ public class NewImportContactsFragment extends Fragment {
                 MediaStore.Files.FileColumns._ID, MediaStore.Files.FileColumns.DATA, MediaStore
                 .Files.FileColumns.SIZE, MediaStore.Files.FileColumns.DATE_MODIFIED
         };
-//        String selection = "(mime_type=='application/vnd.openxmlformats-officedocument" +
-//                ".spreadsheetml.sheet') OR (mime_type=='application/vnd.ms-excel')";
-//        Cursor cursor = getContext().getContentResolver().query(uri, columns, selection, null,
 //                sortOrder);
         // selection 设置为 null
         Cursor cursor = getContext().getContentResolver().query(uri, columns, null, null,
@@ -92,6 +109,12 @@ public class NewImportContactsFragment extends Fragment {
                 mFileInfoList.add(fileInfo);
             }
         }
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter.notifyDataSetChanged();
+            }
+        });
         return mFileInfoList;
     }
 
@@ -195,6 +218,19 @@ public class NewImportContactsFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mPopupWindowList.hide();
                 mSelectedItemView.setBackgroundColor(Color.WHITE);
+//                if (position == 0)
+//                {
+//                    try {
+//                        File file = new File(mSelectedItemFilePath);
+//                        getXlsFileDataByJxl(file);
+//                        addContacts();
+//                    }
+//                    catch (Exception e)
+//                    {
+//
+//                    }
+//                }
+
             }
         });
         mPopupWindowList.setOnWindowDismissListener(new OnWindowDismissListener() {
