@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -139,9 +140,30 @@ public class ImportContactsFragment extends Fragment {
         };
         Cursor cursor = getContext().getContentResolver().query(uri, columns, selection, null,
                 sortOrder);
+//        Cursor cursor = getContext().getContentResolver().query(uri, columns, null, null,
+//                sortOrder);
+        while (cursor.moveToNext()){
+            String filePath = cursor.getString(FileCategoryHelper.COLUMN_PATH);
+            String fileName = Util.getNameFromFilepath(filePath);
+//            String type = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.MIME_TYPE));
+            String type = getMimeType(filePath);
+            if (fileName.endsWith(".xls")||fileName.endsWith(".xlsx"))
+            {
+                Log.e(TAG,"filePath == "+filePath+" -- type = "+type );
+            }
+        }
         return cursor;
     }
 
+
+    public static String getMimeType(String url) {
+        String type = null;
+        String extension = MimeTypeMap.getFileExtensionFromUrl(url);
+        if (extension != null) {
+            type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+        }
+        return type;
+    }
 
     private PopupWindowList mPopupWindowList;
 
