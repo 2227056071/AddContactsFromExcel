@@ -5,6 +5,7 @@ import android.content.ContentProviderOperation;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
@@ -12,16 +13,20 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,6 +45,7 @@ public class NewImportContactsFragment extends Fragment {
     private View mSelectedItemView;
     private CustomFileAdapter mAdapter;
     private String mSelectedItemFilePath;
+    private ProgressBar mProgressBar;
 
     @Nullable
     @Override
@@ -64,22 +70,34 @@ public class NewImportContactsFragment extends Fragment {
             public void OnRecycleViewItemLongClick(View view, FileInfo fileInfo) {
                 mSelectedItemView = view;
                 view.setBackgroundColor(android.graphics.Color.rgb(178, 178, 178));
-                showPopWindows(view);
                 mSelectedItemFilePath = fileInfo.filePath;
+                showPopWindows(view);
             }
         });
         recyclerView.setAdapter(mAdapter);
+        mProgressBar = mFragmentContainer.findViewById(R.id.progress_bar_import_contants);
     }
 
     private void queryExcelFiles() {
-        Runnable task = new Runnable() {
-            @Override
-            public void run() {
-                mFileInfoList = getFileInfoList(); // 遍历本地所有文件，属于耗时操作
-            }
-        };
-        ExecutorService executorService = Executors.newFixedThreadPool(COUNT_THREAD);
-        executorService.execute(task);
+        new QueryFileAsyncTask().execute();
+    }
+
+    private class QueryFileAsyncTask extends AsyncTask {
+        @Override
+        protected Object doInBackground(Object[] objects) {
+            mFileInfoList = getFileInfoList(); // 遍历本地所有文件，属于耗时操作
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Object o) {
+            mProgressBar.setVisibility(View.GONE);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            mProgressBar.setVisibility(View.VISIBLE);
+        }
     }
 
     @SuppressLint("LongLogTag")
@@ -106,6 +124,7 @@ public class NewImportContactsFragment extends Fragment {
                 fileInfo.fileName = fileName;
                 fileInfo.ModifiedDate = modifyTime;
                 fileInfo.fileSize = fileSize;
+                fileInfo.filePath = filePath;
                 mFileInfoList.add(fileInfo);
             }
         }
@@ -221,9 +240,11 @@ public class NewImportContactsFragment extends Fragment {
 //                if (position == 0)
 //                {
 //                    try {
+//                        Log.e(TAG1,"start .... "+ DateFormat.getDateTimeInstance().format(new Date()));
 //                        File file = new File(mSelectedItemFilePath);
 //                        getXlsFileDataByJxl(file);
 //                        addContacts();
+//                        Log.e(TAG1,"end ... "+ DateFormat.getDateTimeInstance().format(new Date()));
 //                    }
 //                    catch (Exception e)
 //                    {
