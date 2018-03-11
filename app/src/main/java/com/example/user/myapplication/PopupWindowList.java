@@ -2,11 +2,13 @@ package com.example.user.myapplication;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -23,6 +25,7 @@ import java.util.List;
 
 public class PopupWindowList {
 
+    private  String TAG="PopupWindowList";
     private Context mContext;
     private PopupWindow mPopupWindow;
     //the view where PopupWindow lie in
@@ -89,17 +92,6 @@ public class PopupWindowList {
         }
     }
 
-    /**
-     * Sets a listener to receive events when a list item is clicked.
-     *
-     * @param clickListener Listener to register
-     *
-     * @see ListView#setOnItemClickListener(AdapterView.OnItemClickListener)
-     */
-    public void setOnItemClickListener(@Nullable AdapterView.OnItemClickListener clickListener) {
-        mItemClickListener = clickListener;
-    }
-
     public void show() {
         if (mAnchorView == null) {
             throw new IllegalArgumentException("PopupWindow show location view can  not be null");
@@ -114,6 +106,12 @@ public class PopupWindowList {
         popView.setAdapter(new ArrayAdapter<>(mContext,
                 R.layout.mylayout, mItemData));
         popView.setOnItemClickListener(mItemClickListener);
+//        popView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                view.setBackgroundColor(Color.RED);
+//            }
+//        });
         popView.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
                 View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
         if (mPopupWindowWidth == 0) {
@@ -164,6 +162,17 @@ public class PopupWindowList {
             }
             mPopupWindow.showAtLocation(mAnchorView, Gravity.NO_GRAVITY, x, y);
         }
+    }
+
+    /**
+     * Sets a listener to receive events when a list item is clicked.
+     *
+     * @param clickListener Listener to register
+     *
+     * @see ListView#setOnItemClickListener(AdapterView.OnItemClickListener)
+     */
+    public void setOnItemClickListener(@Nullable AdapterView.OnItemClickListener clickListener) {
+        mItemClickListener = clickListener;
     }
     OnWindowDismissListener mListener ;
     public void setOnWindowDismissListener(OnWindowDismissListener listener)

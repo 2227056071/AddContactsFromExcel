@@ -153,5 +153,11 @@ public class ImportContactsActivity extends AppCompatActivity {
                 mPopupWindowList.hide();
             }
         });
+        mPopupWindowList.setOnWindowDismissListener(new OnWindowDismissListener() {
+            @Override
+            public void onWindowDismiss() {
+
+            }
+        });
     }
 }

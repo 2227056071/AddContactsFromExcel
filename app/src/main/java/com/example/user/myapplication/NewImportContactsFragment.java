@@ -11,9 +11,9 @@ import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,28 +24,26 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import jxl.Sheet;
 import jxl.Workbook;
 import jxl.read.biff.BiffException;
 
 public class NewImportContactsFragment extends Fragment {
-    private static final int COUNT_THREAD = 5;
-    private View mFragmentContainer;
+    private static final int ITEM_IMPORT_CONTACTS = 0;
     private List<ContactInfo> mContactInfoList = new ArrayList<ContactInfo>();
     static final String TAG1 = "ContactsFragment";
-    private LinearLayoutManager mLayoutManager;
     List<FileInfo> mFileInfoList = new ArrayList<FileInfo>();
+
+    private View mFragmentContainer;
+    private LinearLayoutManager mLayoutManager;
     private View mSelectedItemView;
     private CustomFileAdapter mAdapter;
     private String mSelectedItemFilePath;
     private ProgressBar mProgressBar;
+    private PopupWindowList mPopupWindowList;
 
     @Nullable
     @Override
@@ -75,6 +73,7 @@ public class NewImportContactsFragment extends Fragment {
             }
         });
         recyclerView.setAdapter(mAdapter);
+        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
         mProgressBar = mFragmentContainer.findViewById(R.id.progress_bar_import_contants);
     }
 
@@ -100,7 +99,25 @@ public class NewImportContactsFragment extends Fragment {
         }
     }
 
-    @SuppressLint("LongLogTag")
+    private class ImportContactsAsyncTask extends AsyncTask {
+        @Override
+        protected Object doInBackground(Object[] objects) {
+            addContacts(); // 写通讯录，属于耗时操作
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Object o) {
+            mProgressBar.setVisibility(View.GONE);
+            Toast.makeText(getContext(), "导入完成", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        protected void onPreExecute() {
+            mProgressBar.setVisibility(View.VISIBLE);
+        }
+    }
+
     private List<FileInfo> getFileInfoList() {
         String volumeName = "external";
         Uri uri = MediaStore.Files.getContentUri(volumeName);
@@ -109,7 +126,6 @@ public class NewImportContactsFragment extends Fragment {
                 MediaStore.Files.FileColumns._ID, MediaStore.Files.FileColumns.DATA, MediaStore
                 .Files.FileColumns.SIZE, MediaStore.Files.FileColumns.DATE_MODIFIED
         };
-//                sortOrder);
         // selection 设置为 null
         Cursor cursor = getContext().getContentResolver().query(uri, columns, null, null,
                 sortOrder);
@@ -218,8 +234,7 @@ public class NewImportContactsFragment extends Fragment {
         return type;
     }
 
-    private PopupWindowList mPopupWindowList;
-
+    // 仿微信弹框
     private void showPopWindows(View view) {
         List<String> dataList = new ArrayList<>();
         dataList.add(getResources().getString(R.string.item_import));
@@ -230,30 +245,24 @@ public class NewImportContactsFragment extends Fragment {
         mPopupWindowList.setAnchorView(view);
         mPopupWindowList.setItemData(dataList);
         mPopupWindowList.setModal(true);
-        mPopupWindowList.show();
         mPopupWindowList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @SuppressLint("LongLogTag")
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mPopupWindowList.hide();
                 mSelectedItemView.setBackgroundColor(Color.WHITE);
-//                if (position == 0)
-//                {
-//                    try {
-//                        Log.e(TAG1,"start .... "+ DateFormat.getDateTimeInstance().format(new Date()));
-//                        File file = new File(mSelectedItemFilePath);
-//                        getXlsFileDataByJxl(file);
-//                        addContacts();
-//                        Log.e(TAG1,"end ... "+ DateFormat.getDateTimeInstance().format(new Date()));
-//                    }
-//                    catch (Exception e)
-//                    {
-//
-//                    }
-//                }
+                view.setBackgroundColor(Color.BLACK);
+                if (position == ITEM_IMPORT_CONTACTS) {
+                    try {
+                        File file = new File(mSelectedItemFilePath);
+                        getXlsFileDataByJxl(file);
+                        new ImportContactsAsyncTask().execute();
+                    } catch (Exception e) {
+                    }
+                }
 
             }
         });
+        mPopupWindowList.show();
         mPopupWindowList.setOnWindowDismissListener(new OnWindowDismissListener() {
             @Override
             public void onWindowDismiss() {
