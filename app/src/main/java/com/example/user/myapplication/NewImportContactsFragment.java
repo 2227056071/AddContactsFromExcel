@@ -2,6 +2,7 @@ package com.example.user.myapplication;
 
 import android.annotation.SuppressLint;
 import android.content.ContentProviderOperation;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
@@ -14,6 +15,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,6 +72,12 @@ public class NewImportContactsFragment extends Fragment {
                 view.setBackgroundColor(android.graphics.Color.rgb(178, 178, 178));
                 mSelectedItemFilePath = fileInfo.filePath;
                 showPopWindows(view);
+            }
+
+            @Override
+            public void OnRecycleViewItemClick(FileInfo fileInfo) {
+                Intent intent = getExcelFileIntent(fileInfo.filePath);
+                startActivity(intent);
             }
         });
         recyclerView.setAdapter(mAdapter);
@@ -269,5 +277,15 @@ public class NewImportContactsFragment extends Fragment {
                 mSelectedItemView.setBackgroundColor(Color.WHITE);
             }
         });
+    }
+
+    //Android获取一个用于打开Excel文件的intent
+    public static Intent getExcelFileIntent(String param) {
+        Intent intent = new Intent("android.intent.action.VIEW");
+        intent.addCategory("android.intent.category.DEFAULT");
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        Uri uri = Uri.fromFile(new File(param));
+        intent.setDataAndType(uri, "application/vnd.ms-excel");
+        return intent;
     }
 }

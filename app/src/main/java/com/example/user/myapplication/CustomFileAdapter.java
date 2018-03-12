@@ -46,6 +46,12 @@ public class CustomFileAdapter extends RecyclerView.Adapter<CustomFileAdapter.Fi
                     return true;
                 }
             });
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    listener.OnRecycleViewItemClick(fileInfo);
+                }
+            });
         }
     }
 
