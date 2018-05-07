@@ -2,12 +2,14 @@ package com.example.user.myapplication;
 
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 /**
@@ -36,7 +38,11 @@ public class CustomFileAdapter extends RecyclerView.Adapter<CustomFileAdapter.Fi
         }
 
         public void bind(final FileInfo fileInfo, final OnRecycleViewItemListener listener) {
-            mTextView_modified_time.setText(Long.toString(fileInfo.ModifiedDate));
+            long time=fileInfo.ModifiedDate;
+            SimpleDateFormat formatter = new
+                    SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String result=formatter.format(time);
+            mTextView_modified_time.setText(result);
             mTextView_file_size.setText(Long.toString(fileInfo.fileSize));
             mTextView_file_name.setText(fileInfo.fileName);
             itemView.setOnLongClickListener(new View.OnLongClickListener() {

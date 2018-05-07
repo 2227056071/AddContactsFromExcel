@@ -2,6 +2,7 @@ package com.example.user.myapplication;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 
 public class FileListCursorAdapter extends CursorAdapter {
 
+    private static final String TAG = "FileListCursorAdapter";
     private final LayoutInflater mFactory;
 
     //    private FileViewInteractionHub mFileViewInteractionHub;
