@@ -175,9 +175,27 @@ public class NewImportContactsFragment extends Fragment {
             Sheet sheet = book.getSheet(m);
             int Rows = sheet.getRows();//得到当前工作表的行数
             int Cols = sheet.getColumns(); //得到当前工作表的列数
+            int nameColumnNumber = 0;
+            int mobileColumnNumber = -1;
+            int phoneColumnNumber = -1;
+            for (int i = 0; i < Cols; i++) {
+                String name = sheet.getCell(i, 0).getContents();
+                if (!Util.isEmpty(name))
+                {
+                    if (name.contains(getResources().getString(R.string.phone)))
+                    {
+                        phoneColumnNumber = i;
+                    }
+                    if (name.contains(getResources().getString(R.string.mobile)))
+                    {
+                        mobileColumnNumber = i;
+                    }
+                }
+
+            }
             for (int i = 0; i < Rows; i++) {  // 注意：这里是按行读取的！！！
                 String name = sheet.getCell(0, i).getContents(); //默认第一列是联系人姓名
-                String phone = sheet.getCell(1, i).getContents();//默认第一列是联系人电话号码
+                String phone = sheet.getCell(phoneColumnNumber, i).getContents();//默认第一列是联系人电话号码
                 ContactInfo contactInfo = new ContactInfo();
                 contactInfo.setName(name);
                 contactInfo.setPhoneNumber(phone);

@@ -6,4 +6,6 @@
     <string name="text_export_tab">export</string>
     <string name="text_setting_tab">setting</string>
     <string name="toolbarTitle">helper</string>
+    <string name="phone">电话</string>
+    <string name="mobile">手机</string>
 </resources>

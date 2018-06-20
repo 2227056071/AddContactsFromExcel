@@ -252,8 +252,8 @@ public class Util {
     }
 
     // does not include sd card folder
-    private static String[] SysFileDirs = new String[] {
-        "miren_browser/imagecaches"
+    private static String[] SysFileDirs = new String[]{
+            "miren_browser/imagecaches"
     };
 
     public static boolean shouldShowFile(String path) {
@@ -400,7 +400,7 @@ public class Util {
     public static void updateActionModeTitle(ActionMode mode, Context context, int selectedNum) {
         if (mode != null) {
 //            mode.setTitle(context.getString(R.string.multi_select_title,selectedNum));
-            if(selectedNum == 0){
+            if (selectedNum == 0) {
                 mode.finish();
             }
         }
@@ -422,4 +422,11 @@ public class Util {
 
     public static int CATEGORY_TAB_INDEX = 0;
     public static int SDCARD_TAB_INDEX = 1;
+
+    public static boolean isEmpty(String value) {
+        if ("".equals(value) || (value == null)) {
+            return true;
+        }
+        return false;
+    }
 }
